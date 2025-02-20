@@ -1,6 +1,6 @@
 function textMessage = sign_decoder(bitStream)
     alphabet = ['ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789. '];
-    numBits = 6;
+    numBits = 7;
     numSymbols = length(bitStream) / numBits;
 
     if mod(length(bitStream), numBits) ~= 0
