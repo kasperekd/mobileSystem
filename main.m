@@ -40,3 +40,19 @@ disp(['Декодированный текст: ', decodedText_3]);
 % END - TASK: 3
 
 % START - TASK: 4
+disp('TASK 4: ');
+
+modulatedSymbols = qpsk_modulator(interleavedBits);
+demodulatedBits = qpsk_demodulator(modulatedSymbols);
+
+disp(['Перемешанные биты: ', num2str(interleavedBits)]);
+disp(['Демодулированные биты: ', num2str(demodulatedBits)]);
+
+deinterleavedBits_4 = interleave_reverse(demodulatedBits);
+decodedBits_4 = viterbi_decoder(deinterleavedBits_4);
+disp(['decodedBits_4: ', num2str(decodedBits_4)]);
+decodedText_4 = sign_decoder(decodedBits_4);
+
+disp(['Decoded text after modulation/demodulation: ', decodedText_4]);
+
+% END - TASK: 4

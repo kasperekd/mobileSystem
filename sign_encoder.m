@@ -1,6 +1,6 @@
 function bitStream = sign_encoder(textMessage)
     alphabet = ['ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789. '];
-    numBits = 7;
+    numBits = 6;
     bitStream = [];
 
     for i = 1:length(textMessage)

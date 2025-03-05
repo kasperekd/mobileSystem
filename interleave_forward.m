@@ -1,10 +1,10 @@
 function interleaved = interleave_forward(inputBits)
-    global perm;
+    N = length(inputBits);
 
-    if isempty(perm)
-        N = length(inputBits);
-        perm = randperm(N);
-    end
+    rng(N, 'twister');
+    perm = randperm(N);
+
+    rng('shuffle');
 
     interleaved = inputBits(perm);
 end
