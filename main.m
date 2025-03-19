@@ -66,4 +66,18 @@ C = 0.25;
 
 ofdm_symbol = ofdm_modulator(modulatedSymbols, delta_Rs, T_CP, C);
 
+% disp(ofdm_symbol)
+
 % END - TASK: 5
+
+% START - TASK: 6
+disp('TASK 6: ');
+
+N_path = 3; % Количество лучей
+N0_dB = -10; % Мощность шума в дБ
+f0 = 2.4e9; % Несущая (Hz)
+B = 20e6; % Полоса сигнала (Hz)
+rx_signal = channel_model(ofdm_symbol, N_path, N0_dB, f0, B);
+
+% disp(rx_signal);
+% END - TASK: 6
