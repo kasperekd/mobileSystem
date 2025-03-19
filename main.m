@@ -56,3 +56,14 @@ decodedText_4 = sign_decoder(decodedBits_4);
 disp(['Decoded text after modulation/demodulation: ', decodedText_4]);
 
 % END - TASK: 4
+
+% START - TASK: 5
+disp('TASK 5: ');
+
+delta_Rs = 6;
+T_CP = 16;
+C = 0.25;
+
+ofdm_symbol = ofdm_modulator(modulatedSymbols, delta_Rs, T_CP, C);
+
+% END - TASK: 5
