@@ -1,6 +1,6 @@
 % START - TASK: 1
 disp('TASK 1: ');
-originalText = 'Hello World.';
+originalText = 'Hello World. 1234';
 bitStream = sign_encoder(originalText);
 decodedText = sign_decoder(bitStream);
 
@@ -63,8 +63,9 @@ disp('TASK 5: ');
 delta_Rs = 6;
 T_CP = 16;
 C = 0.25;
+N_subcarrier = 128;
 
-ofdm_symbol = ofdm_modulator(modulatedSymbols, delta_Rs, T_CP, C);
+ofdm_symbol = ofdm_modulator(modulatedSymbols, delta_Rs, T_CP, C, N_subcarrier);
 
 % disp(ofdm_symbol)
 
@@ -73,11 +74,70 @@ ofdm_symbol = ofdm_modulator(modulatedSymbols, delta_Rs, T_CP, C);
 % START - TASK: 6
 disp('TASK 6: ');
 
-N_path = 3; % Количество лучей
-N0_dB = -10; % Мощность шума в дБ
-f0 = 2.4e9; % Несущая (Hz)
-B = 20e6; % Полоса сигнала (Hz)
-rx_signal = channel_model(ofdm_symbol, N_path, N0_dB, f0, B);
+N_path = 3;
+N0_dB = 15;
+max_delay = 6;
+rx_signal = channel_model(ofdm_symbol, N_path, N0_dB, max_delay);
 
-% disp(rx_signal);
+disp(rx_signal);
 % END - TASK: 6
+
+% START - TASK: 7
+
+disp('TASK 7: ');
+
+received_symbols = ofdm_demodulator(rx_signal, delta_Rs, T_CP, C, N_subcarrier);
+% received_symbols = ofdm_demodulator(ofdm_symbol, delta_Rs, T_CP, C, N_subcarrier);
+demodulatedBits = qpsk_demodulator(received_symbols);
+
+% disp('Original QPSK symbols:');
+% disp(modulatedSymbols);
+% disp('Received QPSK symbols:');
+% disp(received_symbols);
+
+% END - TASK: 7
+
+% START - TASK: 8
+disp('TASK 8: ');
+
+min_length = min(length(demodulatedBits), length(interleavedBits));
+
+demodulatedBits_truncated = demodulatedBits(1:min_length);
+interleavedBits_truncated = interleavedBits(1:min_length);
+
+% Расчет BER
+bit_errors = sum(demodulatedBits_truncated ~= interleavedBits_truncated);
+total_bits = length(demodulatedBits_truncated);
+BER = bit_errors / total_bits;
+
+disp(['Количество ошибочных битов: ', num2str(bit_errors)]);
+disp(['Общее количество битов: ', num2str(total_bits)]);
+disp(['BER: ', num2str(BER)]);
+
+figure(1);
+
+subplot(2, 2, 1);
+plot(abs(fft(ofdm_symbol)));
+title('Спектр переданного символа');
+xlabel('Частота');
+ylabel('Амплитуда');
+
+subplot(2, 2, 2);
+plot(abs(fft(rx_signal)));
+title('Спектр принятого символа до эквалайзирования');
+xlabel('Частота');
+ylabel('Амплитуда');
+
+subplot(2, 2, 3);
+scatter(real(modulatedSymbols), imag(modulatedSymbols), 'filled')
+title('Сигнальное созвездие в передатчике');
+xlabel('Re');
+ylabel('Im');
+
+subplot(2, 2, 4);
+scatter(real(received_symbols), imag(received_symbols), 'filled');
+title('Сигнальное созвездие в приемнике');
+xlabel('Re');
+ylabel('Im');
+
+% END - TASK: 8

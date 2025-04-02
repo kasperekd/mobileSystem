@@ -1,43 +1,29 @@
-function [S_out] = channel_model(S_tx, N_path, N0_dB, f0, B)
-    c = 3e8;
-    L = length(S_tx);
+function rx_signal = channel_model(ofdm_symbol, N_path, SNR_dB, max_delay)
+    N = length(ofdm_symbol);
 
-    D = 10 + 490 * rand(1, N_path);
-    D = D(:);
-    D1 = min(D);
+    h = zeros(1, max_delay);
+    path_delays = randperm(max_delay, N_path);
+    path_gains = (randn(1, N_path) + 1i * randn(1, N_path)) / sqrt(2);
 
-    T_s = 1 / B;
-    tau = round((D - D1) ./ (c * T_s));
-
-    if any(tau < 0)
-        error('Отрицательная задержка - ошибка расчета!');
+    for k = 1:N_path
+        h(path_delays(k)) = path_gains(k);
     end
 
-    G = c ./ (4 * pi * D .* f0);
+    h = h / sqrt(mean(abs(h) .^ 2));
 
-    max_tau = max(tau);
-    S_i = cell(N_path, 1);
+    channel_output = conv(ofdm_symbol, h, 'same');
 
-    for i = 1:N_path
-        S_i{i} = [zeros(1, tau(i)), S_tx];
+    signal_power = mean(abs(channel_output) .^ 2);
+    channel_output = channel_output / sqrt(signal_power);
 
-        current_len = length(S_i{i});
+    SNR_linear = 10 ^ (SNR_dB / 10);
+    noise_power = 1 / SNR_linear;
+    noise = sqrt(noise_power / 2) * (randn(1, N) + 1i * randn(1, N));
 
-        if current_len < L + max_tau
-            S_i{i} = [S_i{i}, zeros(1, L + max_tau - current_len)];
-        end
+    rx_signal = channel_output + noise;
 
-    end
+    random_ir = (randn(1, max_delay) + 1i * randn(1, max_delay)) / sqrt(2);
+    random_ir = random_ir / sqrt(mean(abs(random_ir) .^ 2));
 
-    S_mpy = zeros(1, L + max_tau, 'like', 1i);
-
-    for i = 1:N_path
-        S_mpy = S_mpy + G(i) * S_i{i};
-    end
-
-    M = length(S_mpy);
-    n = wgn(M, 1, N0_dB, 'complex');
-    S_rx = S_mpy + n;
-
-    S_out = S_rx(1:L);
+    rx_signal = conv(rx_signal, random_ir, 'same');
 end

@@ -1,9 +1,14 @@
-function [modulated_symbol] = ofdm_modulator(qpsk_symbols, delta_Rs, T_CP, C)
-    N_data = length(qpsk_symbols);
-
-    N_subcarrier = calculate_N_subcarrier(N_data, delta_Rs);
-
+function [modulated_symbol] = ofdm_modulator(qpsk_symbols, delta_Rs, T_CP, C, N_subcarrier)
     N_RS = floor((N_subcarrier - 1) / delta_Rs) + 1;
+    N_data = N_subcarrier - N_RS;
+
+    if length(qpsk_symbols) < N_data
+        qpsk_symbols = [qpsk_symbols, zeros(1, N_data - length(qpsk_symbols))];
+    elseif length(qpsk_symbols) > N_data
+        error(['Too many data symbols for the given number of subcarriers. ', ...
+                   'Available subcarriers for data: ', num2str(N_data), ...
+                   '. Provided data length: ', num2str(length(qpsk_symbols))]);
+    end
 
     rs_indices = 1:delta_Rs:N_subcarrier;
 
@@ -15,14 +20,9 @@ function [modulated_symbol] = ofdm_modulator(qpsk_symbols, delta_Rs, T_CP, C)
     all_indices = 1:N_subcarrier;
     data_indices = setdiff(all_indices, rs_indices);
 
-    if length(data_indices) ~= N_data
-        error('Mismatch between data length and available subcarriers');
-    end
-
     subcarriers(data_indices) = qpsk_symbols;
 
-    N_0 = round(C * (N_subcarrier + N_RS));
-
+    N_0 = round(C * (N_subcarrier / (1 - C)));
     left_zeros = zeros(1, N_0);
     right_zeros = zeros(1, N_0);
     full_subcarriers = [left_zeros, subcarriers, right_zeros];
@@ -35,21 +35,4 @@ function [modulated_symbol] = ofdm_modulator(qpsk_symbols, delta_Rs, T_CP, C)
 
     cp = ofdm_temp(end - T_CP + 1:end);
     modulated_symbol = [cp, ofdm_temp];
-end
-
-function N_subcarrier = calculate_N_subcarrier(N_data, delta_Rs)
-    x = N_data;
-
-    while true
-        current_N_RS = floor((x - 1) / delta_Rs) + 1;
-
-        if x - current_N_RS == N_data
-            break;
-        else
-            x = x + 1;
-        end
-
-    end
-
-    N_subcarrier = x;
 end

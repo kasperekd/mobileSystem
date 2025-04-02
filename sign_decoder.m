@@ -3,9 +3,9 @@ function textMessage = sign_decoder(bitStream)
     numBits = 6;
     numSymbols = length(bitStream) / numBits;
 
-    if mod(length(bitStream), numBits) ~= 0
-        error('Длина битового потока некорректна');
-    end
+    % if mod(length(bitStream), numBits) ~= 0
+    %     error('Длина битового потока некорректна');
+    % end
 
     textMessage = '';
 
